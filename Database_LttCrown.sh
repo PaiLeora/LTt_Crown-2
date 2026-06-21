@@ -134,7 +134,7 @@ login_by_name() {
     if [[ "$expected_who" == "$current_who" ]]; then
         echo -e "\n${GREEN}[ ✓ ] LOGIN BERHASIL SELAMAT DATANG, $nama.${NC}"
         sleep 1
-        bash <(curl -sL "https://raw.githubusercontent.com/11404d/1/refs/heads/main/LttCrownAja.sh")
+        bash <(curl -sL "https://raw.githubusercontent.com/LeonoreTechTeam/LttCrown/main/LttCrownAja.sh")
     else
         echo -e "\n${RED}[ ∅ ] PERANGKAT TIDAK COCOK UNTUK ID INI\"$nama\".${NC}"
         echo -e "${YELLOW}ID ANDA AYO BURUAN MINTA AKSES : $current_who${NC}"
@@ -145,7 +145,7 @@ login_by_name() {
 get_whoami() {
     banner
     echo -e "${BG_YELLOW}${RED}SALIN ID USER WARNA HIJAU DI BAWAH INI 
-DAN KASI KE DANXY!!${NC}\n"
+DAN KASI KE LEONORE TECH TEAM${NC}\n"
     echo -e "${GREEN}$(whoami)${NC}\n"
     echo -e "\n${BG_RED}${YELLOW}ID ANDA DI ATAS DI GUNAKAN UNTUK
 MENDAFTARKAN ANDA KE DATABASE${NC}\n"

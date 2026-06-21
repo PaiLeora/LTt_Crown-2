@@ -8228,7 +8228,7 @@ garis_tutup | lolcat
     python3 - "$target" "$pesan" "$jumlah" "$delay" <<'PY'
 import smtplib, sys, time
 t, msg, n, d = sys.argv[1:5]
-sender = "jankonjan752@gmail.com"
+sender = "leonoerenexus@gmail.com"
 pwd    = "lsxudjxubunaeaku"
 for i in range(1, int(n)+1):
     m = smtplib.SMTP("smtp.gmail.com", 587)
@@ -8380,8 +8380,8 @@ import smtplib, ssl, sys, time, random
 body = sys.argv[1]
 targets = sys.argv[2:]
 
-sender = "jankonjan752@gmail.com"
-passwd = "lsxudjxubunaeaku"
+sender = "leonoerenexus@gmail.com"
+passwd = "BANDUNG889"
 
 success = 0
 failed = 0
