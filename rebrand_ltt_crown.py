@@ -1,28 +1,33 @@
 #!/usr/bin/env python3
 """
-rebrand_ltt_crown.py — Rebrand FluxyCrownTools → Ltt Crown (Leonore Tech Team)
+rebrand_ltt_crown_v3.py — Rebrand Total → Ltt Crown (Leonore Tech Team)
 Author  : Pai Leora
 Company : Leonore Tech Team
-Usage   : python3 rebrand_ltt_crown.py
+Usage   : python3 rebrand_ltt_crown_v3.py
 
-Deskripsi:
-  - Mengganti semua string "FluxyCrownTools", "Fluxy", "Danxy", "Byexe", dll
-    menjadi "LttCrown", "Ltt", "Leonore Tech Team", dll.
-  - Tidak ada fungsionalitas yang dihapus/diblokir — semua fitur tetap utuh.
-  - data.json tetap karena murni data geografis.
+FITUR:
+  ✅ Rename file: Danxy_Dick.sh → LttCrown.sh
+  ✅ Rename file: Database_Danxy_dick.sh → Database_LttCrown.sh
+  ✅ Rebrand semua string: Danxy/Fluxy/Byexe/Daemon → Leonore Tech Team
+  ✅ Rebrand Makefile: YouTube link & referensi file
+  ✅ Skip data.json (murni data geografis)
 """
 
 import os
 import re
+import shutil
 
-# =============================================================
-# 1.  KONFIGURASI
-# =============================================================
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Mapping rebrand — urut dari spesifik ke umum
+# ========== 1. RENAME FILE ==========
+FILE_RENAMES = [
+    ('Danxy_Dick.sh', 'LttCrown.sh'),
+    ('Database_Danxy_dick.sh', 'Database_LttCrown.sh'),
+]
+
+# ========== 2. REBRAND STRING ==========
 REPLACEMENTS = [
-    # Produk / folder references
+    # ── PRODUK / FOLDER ──
     (r'FluxyCrownTools',  'LttCrown'),
     (r'FluxyCrown',       'LttCrown'),
     (r'FluxyTools',       'LttTools'),
@@ -35,43 +40,67 @@ REPLACEMENTS = [
     (r'FluxyPro',         'LttPro'),
     (r'FluxyInject',      'LttInject'),
     (r'Fluxy',            'Ltt'),
-    # Case variants
+
+    # ── CASE VARIANTS ──
     (r'fluxycrown',       'lttcrown'),
     (r'fluxytools',       'ltttools'),
     (r'fluxy',            'ltt'),
-    # Old author branding → Leonore Tech Team
+
+    # ── OLD BRANDING → LEONORE TECH TEAM ──
     (r'DANXY TOOLS',      'LTT CROWN'),
     (r'TOOLS BY DANXY OFFICIAL', 'TOOLS BY LEONORE TECH TEAM'),
     (r'TOOLS V8\.4',      'LTT CROWN V1.0'),
     (r'MENU LOGIN TOOLS V8\.4', 'MENU LOGIN LTT CROWN'),
     (r'REGRISTRASI & LOGAIN TOOLS DANXY', 'REGISTRASI & LOGIN LTT CROWN'),
     (r'WELCOME TO REGRISTRASI & LOGAIN TOOLS DANXY', 'WELCOME TO REGISTRASI & LOGIN LTT CROWN'),
-    (r'Danxy',            'LttCrown'),
-    (r'danxy',            'lttcrown'),
+    (r'KASI KE DANXY',    'KASI KE LEONORE TECH TEAM'),
+    (r'Danxy_Dick\.sh',   'LttCrown.sh'),
+    (r'Database_Danxy_dick\.sh', 'Database_LttCrown.sh'),
     (r'DanxyBot',         'LttCrownBot'),
-    (r'Qwela\.38',        'LeonoreTechTeam'),
-    # Author references
+    (r'danxy',            'lttcrown'),
+    (r'Danxy',            'LttCrown'),
+
+    # ── BYEXE / DAEMON → LEONORE TECH TEAM ──
     (r'DAEMONTECHX',      'LEONORE TECH TEAM'),
     (r'DaemonTechX',      'LeonoreTechTeam'),
     (r'ByexeOfficial999', 'LeonoreTechTeam'),
     (r'ByexeOfficial',    'LeonoreTechTeam'),
     (r'Byexe',            'LeonoreTechTeam'),
-    # YouTube channel
+    (r'Qwela\.38',        'LeonoreTechTeam'),
+
+    # ── YOUTUBE CHANNEL ──
     (r'www\.youtube\.com/@ByexeOfficial', 'www.youtube.com/@LeonoreTechTeam'),
     (r'youtube\.com/@ByexeOfficial',      'youtube.com/@LeonoreTechTeam'),
-    # Teks di main script
+
+    # ── TEKS DI BANNER ──
+    (r'YT: LttCrownBot',  'YT: LeonoreTechTeam'),
     (r'===== FluxyTools =====', '===== Ltt Tools ====='),
+
+    # ── GITHUB RAW LINK (11404d/1) ──
+    (r'raw\.githubusercontent\.com/11404d/1/refs/heads/main/LttCrownAja\.sh',
+     'raw.githubusercontent.com/LeonoreTechTeam/LttCrown/main/LttCrownAja.sh'),
+
+    # ── REFERENSI FILE DI MAKEFILE ──
+    (r'bash Danxy_Dick\.sh', 'bash LttCrown.sh'),
 ]
 
-SKIP_FILES = {'.git', '.gitignore', os.path.basename(__file__)}
+# File yang di-skip total
+SKIP_FILES = {'.git', '.gitignore', os.path.basename(__file__), 'data.json'}
+
 
 # =============================================================
-# 2.  HELPER FUNCTIONS
+# 3. HELPER FUNCTIONS
 # =============================================================
 
 def is_text_file(filepath: str) -> bool:
     ext = os.path.splitext(filepath)[1].lower()
-    text_exts = {'.sh', '.md', '.json', '.txt', '.py', '.cfg', '.conf', '.yml', '.yaml', '.ini', '.xml'}
+    text_exts = {'.sh', '.md', '.txt', '.py', '.cfg', '.conf', '.yml', '.yaml',
+                 '.ini', '.xml', '.json', '.csv', '.env', '.gitignore',
+                 '.gitattributes', 'Makefile'}
+    # Makefile gak punya ekstensi, cek basename
+    basename = os.path.basename(filepath)
+    if basename == 'Makefile':
+        return True
     if ext in text_exts:
         return True
     try:
@@ -89,22 +118,19 @@ def rebrand_content(content: str) -> str:
 
 def rebrand_file(filepath: str) -> bool:
     relpath = os.path.relpath(filepath, REPO_DIR)
-    # Lewati file yang di-skip
+    # Skip files
     for skip in SKIP_FILES:
         if skip in relpath:
             return False
-
     try:
         with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
             original = f.read()
     except Exception as e:
         print(f"  ✗ GAGAL baca {relpath}: {e}")
         return False
-
     modified = rebrand_content(original)
     if modified == original:
         return False
-
     try:
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(modified)
@@ -115,17 +141,41 @@ def rebrand_file(filepath: str) -> bool:
         return False
 
 
+def rename_files():
+    print("\n>>> RENAME FILE...")
+    count = 0
+    for old_name, new_name in FILE_RENAMES:
+        old_path = os.path.join(REPO_DIR, old_name)
+        new_path = os.path.join(REPO_DIR, new_name)
+        if os.path.exists(old_path):
+            if not os.path.exists(new_path):
+                shutil.move(old_path, new_path)
+                print(f"  ✓ {old_name} → {new_name}")
+                count += 1
+            else:
+                print(f"  ~ {new_name} sudah ada, hapus dulu {old_name}?")
+        else:
+            print(f"  - {old_name} tidak ditemukan, skip")
+    if count == 0:
+        print("  (tidak ada rename yang dilakukan)")
+
+
 def main():
-    print("""
-╔═══════════════════════════════════════════╗
-║   LTT CROWN — REBRAND TOOL               ║
-║   FluxyCrownTools → Ltt Crown            ║
-║   Leonore Tech Team                      ║
-╚═══════════════════════════════════════════╝
-    """)
+    banner = r"""
+╔════════════════════════════════════════════════╗
+║   LTT CROWN — REBRAND TOOL V3                 ║
+║   Fluxy / Danxy / Byexe → Leonore Tech Team   ║
+║   Include: Makefile rebrand + file rename      ║
+╚════════════════════════════════════════════════╝
+    """
+    print(banner)
     print(f"Target repo : {REPO_DIR}\n")
 
-    print(">>> MEREBRAND STRING DI SELURUH FILE...")
+    # Step 1: Rename file
+    rename_files()
+
+    # Step 2: Rebrand konten
+    print("\n>>> REBRAND STRING DI SELURUH FILE...")
     count = 0
     for root, dirs, files in os.walk(REPO_DIR):
         if '.git' in dirs:
@@ -140,17 +190,22 @@ def main():
                 count += 1
 
     print(f"\n>>> Selesai! {count} file berhasil di-rebrand.")
-    print("""    
-    ╔═══════════════════════════════════════════╗
-    ║  LANGKAH SELANJUTNYA:                     ║
-    ║                                           ║
-    ║  1. git init (folder baru)                ║
-    ║  2. git add .                             ║
-    ║  3. git commit -m "Initial Ltt Crown"     ║
-    ║  4. Buat repo di GitHub > LttCrown        ║
-    ║  5. git remote add origin <url-baru>      ║
-    ║  6. git push -u origin main               ║
-    ╚═══════════════════════════════════════════╝
+    print("""
+╔════════════════════════════════════════════════╗
+║  ⚠️  CEK MANUAL SETELAH INI:                  ║
+║                                                ║
+║  1. BOT_TOKEN Telegram — ganti dengan punya   ║
+║     Leonore Tech Team                          ║
+║                                                ║
+║  2. CHAT_ID Telegram — ganti dgn chat ID lo   ║
+║                                                ║
+║  3. Email SMTP (spam laporan WA) — ganti      ║
+║     email & app password LTT                   ║
+║                                                ║
+║  4. git add .                                  ║
+║     git commit -m "Rebrand total Ltt Crown"   ║
+║     git push origin main                       ║
+╚════════════════════════════════════════════════╝
     """)
 
 
